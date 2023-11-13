@@ -1,14 +1,13 @@
-import sys
+from modal import Image, Stub, web_endpoint
 
-import modal
-
-stub = modal.Stub(
+stub = Stub(
     "kth-demo-sentiment-analysis-webhook",
-    image=modal.Image.debian_slim().pip_install(["torch", "transformers"]),
+    image=Image.debian_slim().pip_install(["torch", "transformers"]),
 )
 
 
-@stub.webhook
+@stub.function()
+@web_endpoint()
 def predict(phrase: str):
     from transformers import pipeline
 
@@ -18,7 +17,3 @@ def predict(phrase: str):
     pred = sentiment_pipeline(phrase, truncation=True, max_length=512, top_k=2)
     probs = {p["label"]: p["score"] for p in pred}
     return probs["POSITIVE"]
-
-
-if __name__ == "__main__":
-    stub.serve()

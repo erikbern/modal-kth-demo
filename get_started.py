@@ -1,14 +1,9 @@
-import modal
+from modal import Stub
 
-stub = modal.Stub()
-
-
-@stub.function
-def square(x):
-    print("This code is running on a remote worker!")
-    return x**2
+stub = Stub()
 
 
-if __name__ == "__main__":
-    with stub.run():
-        print("the square is", square(42))
+@stub.function()
+def square(x: int):
+    square: int = x**2
+    print(f"This square is: {square}")
