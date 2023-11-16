@@ -4,12 +4,14 @@ stub = Stub(
     image=Image.debian_slim().pip_install(["datasets", "torch", "transformers"])
 )
 
+with stub.image.run_inside():
+    from transformers import pipeline
+    from datasets import load_dataset
+
 
 @stub.cls(concurrency_limit=64, gpu="a100")
 class Predictor:
     def __enter__(self):
-        from transformers import pipeline
-
         self.sentiment_pipeline = pipeline(
             model="distilbert-base-uncased-finetuned-sst-2-english"
         )
@@ -23,8 +25,6 @@ class Predictor:
 
 @stub.function()
 def big_map():
-    from datasets import load_dataset
-
     imdb = load_dataset("imdb")
     data = [row["text"] for row in imdb["test"]]
     for phrase, score in Predictor().predict.map(data):
